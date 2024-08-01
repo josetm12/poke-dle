@@ -1,0 +1,18 @@
+.tile {
+  height: 3rem;
+  width: 3rem;
+  border-radius: 0.3rem;
+  border: 1px solid #ccc;
+}
+
+.correct {
+  background-color: green;
+}
+
+.close {
+  background-color: yellow;
+}
+
+.incorrect {
+  background-color: grey;
+}

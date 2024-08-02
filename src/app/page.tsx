@@ -1,17 +1,24 @@
 'use client';
 
-import { useEffect, useState, createContext, useCallback } from 'react';
+import Image from 'next/image';
+import pikaGif from './/pikachu-pokemon.gif';
+import {
+  useEffect,
+  useState,
+  createContext,
+  useCallback,
+  useContext,
+} from 'react';
 import ModeToggle from '@/components/ModeToggle';
 import Keyboard from '@/components/Keyboard';
 import WordleGrid from '@/components/WordleGrid';
-import { Eraser, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import useRandomPokemonName from '@/hooks/useRandomPokemonName';
 import usePokemonDetails from '@/hooks/usePokemonDetails';
 
-const EMPTY_STRING_5 = '     ';
-const INITIAL_GUESSES = Array(6).fill(EMPTY_STRING_5);
+import { EMPTY_STRING, getNoGuesses, getInitialGuesses } from '@/lib/appConfig';
 
 export const SolutionContext = createContext('');
 
@@ -25,27 +32,23 @@ const ErrorComponent = () => {
   );
 };
 
-export default function Home() {
-  const [guesses, setGuesses] = useState(INITIAL_GUESSES);
+function Game({ solution }) {
+  const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameWin, setGameWin] = useState(false);
   const [guessedLetters, setGuessedLetters] = useState<{
     [key: string]: 'correct' | 'present' | 'absent' | 'unused';
   }>({});
 
-  const lastGuessIndex = guesses.findIndex((guess) => guess === EMPTY_STRING_5);
-  const isGameOver = lastGuessIndex === -1 || gameWin;
-  const {
-    pokemonName: solution,
-    loading: nameLoading,
-    error: nameError,
-  } = useRandomPokemonName();
   const {
     pokemonDetails,
     loading: detailsLoading,
     error: detailsError,
   } = usePokemonDetails(solution, gameWin);
-  const isSiteDown = !!nameError;
+  const lastGuessIndex = guesses.findIndex(
+    (guess) => guess === EMPTY_STRING.repeat(solution.length)
+  );
+  const isGameOver = lastGuessIndex === -1 || gameWin;
 
   const eraseHandler = useCallback(() => {
     setCurrentGuess((prev) => prev.slice(0, -1));
@@ -53,10 +56,10 @@ export default function Home() {
 
   const resetHandler = useCallback(() => {
     setGameWin(false);
-    setGuesses(INITIAL_GUESSES);
+    setGuesses(getInitialGuesses(solution));
     setCurrentGuess('');
     setGuessedLetters({});
-  }, []);
+  }, [solution]);
 
   const updateGuessedLetters = useCallback(
     (guess: string) => {
@@ -87,7 +90,7 @@ export default function Home() {
       }
       if (key === 'backspace') {
         eraseHandler();
-      } else if (key === 'enter' && currentGuess.length === 5) {
+      } else if (key === 'enter' && currentGuess.length === solution.length) {
         const newGuesses = [...guesses];
         newGuesses[lastGuessIndex] = currentGuess;
         setGuesses(newGuesses);
@@ -96,7 +99,7 @@ export default function Home() {
           setGameWin(true);
         }
         setCurrentGuess('');
-      } else if (/^[a-z]$/.test(key) && currentGuess.length < 5) {
+      } else if (/^[a-z]$/.test(key) && currentGuess.length < solution.length) {
         setCurrentGuess((prev) => prev + key);
       }
     },
@@ -112,18 +115,9 @@ export default function Home() {
     ]
   );
 
-  // useEffect(() => {
-  //   try {
-  //     fetch('https://random-word-api.herokuapp.com/word?length=5')
-  //       .then((response) => response.json())
-  //       .then((data) => {
-  //         setSolution(data[0]);
-  //         setIsLoading(false);
-  //       });
-  //   } catch (error) {
-  //     setIsSiteDown(true);
-  //   }
-  // }, []);
+  useEffect(() => {
+    resetHandler();
+  }, [solution, resetHandler]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -136,37 +130,51 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-10">
-      {nameLoading ? (
-        <div className="flex items-center justify-center my-auto">
-          <div className="loader text-xl">Loading...</div>
+      <>
+        <div className="fixed top-2 right-2">
+          <Button
+            onClick={resetHandler}
+            variant="outline"
+            size="icon"
+            className="mr-2"
+          >
+            <RotateCcw className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
+          </Button>
+          <ModeToggle />
+        </div>
+        <SolutionContext.Provider value={solution}>
+          <WordleGrid guesses={guesses} currentGuess={currentGuess} />
+        </SolutionContext.Provider>
+        {gameWin && <p>You WIN</p>}
+        {isGameOver && !gameWin && <p>Game Over. Try again?</p>}
+        <p>Solution is: {solution}</p>
+        <Keyboard onKeyPress={handleKeyPress} guessedLetters={guessedLetters} />
+      </>
+    </main>
+  );
+}
+
+export default function Home() {
+  const {
+    pokemonName: solution,
+    loading: solutionLoading,
+    error: apiError,
+  } = useRandomPokemonName();
+
+  const isSiteDown = !!apiError;
+  debugger;
+  return (
+    <>
+      {solutionLoading ? (
+        <div className="flex items-center justify-center my-auto min-h-svh">
+          <Image src={pikaGif} alt="Loading Icon" height={50} width={50} />
+          ...
         </div>
       ) : isSiteDown ? (
         <ErrorComponent />
       ) : (
-        <>
-          <div className="fixed top-2 right-2">
-            <Button
-              onClick={resetHandler}
-              variant="outline"
-              size="icon"
-              className="mr-2"
-            >
-              <RotateCcw className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all" />
-            </Button>
-            <ModeToggle />
-          </div>
-          <SolutionContext.Provider value={solution}>
-            <WordleGrid guesses={guesses} currentGuess={currentGuess} />
-          </SolutionContext.Provider>
-          {gameWin && <p>You WIN</p>}
-          {isGameOver && !gameWin && <p>Game Over. Try again?</p>}
-          <p>Solution is: {solution}</p>
-          <Keyboard
-            onKeyPress={handleKeyPress}
-            guessedLetters={guessedLetters}
-          />
-        </>
+        <Game solution={solution} />
       )}
-    </main>
+    </>
   );
 }

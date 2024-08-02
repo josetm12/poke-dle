@@ -2,8 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import styles from './Wordlegrid.module.css';
 import { cn } from '@/lib/utils';
 import { SolutionContext } from '@/app/page';
-
-const EMPTY_STRING_1 = ' ';
+import { EMPTY_STRING, getEmptyRow } from '@/lib/appConfig';
 
 interface WordTileProps {
   letter: string;
@@ -15,7 +14,7 @@ const WordTile: React.FC<WordTileProps> = React.memo(
     const [isFlipping, setIsFlipping] = useState(false);
 
     useEffect(() => {
-      if (letter !== ' ') {
+      if (letter !== EMPTY_STRING) {
         setIsFlipping(true);
         const timer = setTimeout(() => setIsFlipping(false), 500); // 500ms matches the animation duration
         return () => clearTimeout(timer);
@@ -51,7 +50,7 @@ const getTileClass = (
 ): string => {
   if (letter === solution[index]) return styles.correct;
   if (solution.includes(letter)) return styles.close;
-  return letter !== ' ' ? styles.incorrect : '';
+  return letter !== EMPTY_STRING ? styles.incorrect : '';
 };
 
 const Row: React.FC<RowProps> = React.memo(({ guess, isActiveRow }) => {
@@ -78,8 +77,13 @@ interface WordleGridProps {
 }
 
 const WordleGrid: React.FC<WordleGridProps> = ({ guesses, currentGuess }) => {
-  const activeRow = guesses.findIndex((val) => val === '     ');
-  const filler = EMPTY_STRING_1.repeat(Math.max(0, 5 - currentGuess.length));
+  const solution = useContext(SolutionContext);
+  const activeRow = guesses.findIndex((val) => val === getEmptyRow(solution));
+  const filler = EMPTY_STRING.repeat(
+    Math.max(0, solution.length - currentGuess.length)
+  );
+
+  console.log('currentGuess', currentGuess);
 
   return (
     <div className="flex flex-col gap-1">

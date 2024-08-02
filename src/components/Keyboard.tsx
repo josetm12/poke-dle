@@ -15,7 +15,6 @@ const KEYBOARD_ROWS = [
 ];
 
 const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, guessedLetters }) => {
-  console.log('guessed', guessedLetters);
   const handleKeyClick = (key: string) => {
     if (key === 'BACKSPACE') {
       onKeyPress('backspace');
@@ -25,8 +24,6 @@ const Keyboard: React.FC<KeyboardProps> = ({ onKeyPress, guessedLetters }) => {
       onKeyPress(key.toLowerCase());
     }
   };
-
-  console.log('render KB');
 
   return (
     <div className={styles.keyboard}>

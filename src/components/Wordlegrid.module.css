@@ -2,17 +2,70 @@
   height: 3rem;
   width: 3rem;
   border-radius: 0.3rem;
-  border: 1px solid #ccc;
+  transition: all 0.3s ease;
+  perspective: 1000px;
+  transform-style: preserve-3d;
 }
 
-.correct {
-  background-color: green;
+.tile.flip {
+  animation: flip 0.5s ease forwards;
 }
 
-.close {
-  background-color: yellow;
+@keyframes flip {
+  0% {
+    transform: rotateX(0deg);
+    background-color: transparent;
+  }
+  45% {
+    transform: rotateX(90deg);
+    background-color: transparent;
+  }
+  55% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
 }
 
-.incorrect {
-  background-color: grey;
+/* Light theme */
+:global(.light) .tile {
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+}
+
+:global(.light) .correct {
+  background-color: #86efac;
+  border-color: #86efac;
+}
+
+:global(.light) .close {
+  background-color: #fde68a;
+  border-color: #fde68a;
+}
+
+:global(.light) .incorrect {
+  background-color: #d1d5db;
+  border-color: #d1d5db;
+}
+
+/* Dark theme */
+:global(.dark) .tile {
+  border: 1px solid #4b5563;
+  background-color: #1f2937;
+}
+
+:global(.dark) .correct {
+  background-color: #059669;
+  border-color: #059669;
+}
+
+:global(.dark) .close {
+  background-color: #d97706;
+  border-color: #d97706;
+}
+
+:global(.dark) .incorrect {
+  background-color: #4b5563;
+  border-color: #4b5563;
 }

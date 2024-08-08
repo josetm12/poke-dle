@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import styles from './Wordlegrid.module.css';
 import { cn } from '@/lib/utils';
-import { SolutionContext } from '@/app/page';
 import { EMPTY_STRING, getEmptyRow } from '@/lib/appConfig';
+import { GameContext } from '@/reducers/gameReducer';
 
 interface WordTileProps {
   letter: string;
@@ -54,7 +54,7 @@ const getTileClass = (
 };
 
 const Row: React.FC<RowProps> = React.memo(({ guess, isActiveRow }) => {
-  const solution = useContext(SolutionContext).split('');
+  const solution = useContext(GameContext).split('');
 
   return (
     <div className="flex gap-1">
@@ -77,7 +77,7 @@ interface WordleGridProps {
 }
 
 const WordleGrid: React.FC<WordleGridProps> = ({ guesses, currentGuess }) => {
-  const solution = useContext(SolutionContext);
+  const solution = useContext(GameContext);
   const activeRow = guesses.findIndex((val) => val === getEmptyRow(solution));
   const filler = EMPTY_STRING.repeat(
     Math.max(0, solution.length - currentGuess.length)

@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react';
-
-interface pokemonType {
-  slot: number;
-  type: {
-    name: string;
-    url: string;
-  };
-}
+import { pokemonType } from '@/lib/types';
 
 interface PokemonDetails {
   name: string;
@@ -25,10 +18,7 @@ interface UsePokemonDetailsReturn {
   error: string | null;
 }
 
-const usePokemonDetails = (
-  pokemonName: string,
-  gameWin: boolean
-): UsePokemonDetailsReturn => {
+const usePokemonDetails = (pokemonName: string): UsePokemonDetailsReturn => {
   const [pokemonDetails, setPokemonDetails] = useState<PokemonDetails | null>(
     null
   );
@@ -37,12 +27,12 @@ const usePokemonDetails = (
 
   useEffect(() => {
     //Only return the details if the game has been won
-    if (!pokemonName || !gameWin) return;
+    if (!pokemonName) return;
 
     const fetchPokemonDetails = async () => {
       try {
         const response = await fetch(
-          `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
+          `https://pokeapi.co/api/v2/pokemon-species/${pokemonName}`
         );
         if (!response.ok) {
           throw new Error('Network response was not ok');

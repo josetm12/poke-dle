@@ -14,13 +14,12 @@ import Keyboard from '@/components/Keyboard';
 import WordleGrid from '@/components/WordleGrid';
 import { RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
+import { GameContext } from '@/reducers/gameReducer';
 import useRandomPokemonName from '@/hooks/useRandomPokemonName';
 import usePokemonDetails from '@/hooks/usePokemonDetails';
-
+import ImageWithFallback from '@/components/SpriteImageWithFallback';
 import { EMPTY_STRING, getNoGuesses, getInitialGuesses } from '@/lib/appConfig';
-
-export const SolutionContext = createContext('');
+import GameTitle from '@/components/GameTitle';
 
 const ErrorComponent = () => {
   return (
@@ -32,7 +31,8 @@ const ErrorComponent = () => {
   );
 };
 
-function Game({ solution }) {
+//@ts-ignore
+function Game({ solution, pokemonDexNo, spriteBaseColor }) {
   const [guesses, setGuesses] = useState<string[]>([]);
   const [currentGuess, setCurrentGuess] = useState('');
   const [gameWin, setGameWin] = useState(false);
@@ -40,11 +40,6 @@ function Game({ solution }) {
     [key: string]: 'correct' | 'present' | 'absent' | 'unused';
   }>({});
 
-  const {
-    pokemonDetails,
-    loading: detailsLoading,
-    error: detailsError,
-  } = usePokemonDetails(solution, gameWin);
   const lastGuessIndex = guesses.findIndex(
     (guess) => guess === EMPTY_STRING.repeat(solution.length)
   );
@@ -142,13 +137,25 @@ function Game({ solution }) {
           </Button>
           <ModeToggle />
         </div>
-        <SolutionContext.Provider value={solution}>
+        <GameContext.Provider value={solution}>
+          <GameTitle gameWin={gameWin} isGameOver={isGameOver} />
+          <div className="w-full flex items-center justify-center">
+            <ImageWithFallback
+              className="poke-sprite relative"
+              pokedexNumber={pokemonDexNo}
+              gameWin={gameWin}
+              spriteBaseColor={spriteBaseColor}
+              fallBack="/public/pika-fallback.png"
+              alt="pokemon sprite"
+            />
+          </div>
           <WordleGrid guesses={guesses} currentGuess={currentGuess} />
-        </SolutionContext.Provider>
-        {gameWin && <p>You WIN</p>}
-        {isGameOver && !gameWin && <p>Game Over. Try again?</p>}
-        <p>Solution is: {solution}</p>
-        <Keyboard onKeyPress={handleKeyPress} guessedLetters={guessedLetters} />
+          <p>Solution is: {solution}</p>
+          <Keyboard
+            onKeyPress={handleKeyPress}
+            guessedLetters={guessedLetters}
+          />
+        </GameContext.Provider>
       </>
     </main>
   );
@@ -156,13 +163,17 @@ function Game({ solution }) {
 
 export default function Home() {
   const {
-    pokemonName: solution,
+    pokemonName,
+    data: pokemonDetails,
     loading: solutionLoading,
     error: apiError,
   } = useRandomPokemonName();
 
+  const pokemonDexNo = pokemonDetails?.id || 0;
+  const spriteBaseColor = pokemonDetails?.color?.name || 'gray';
+
   const isSiteDown = !!apiError;
-  debugger;
+  if (pokemonName) debugger;
   return (
     <>
       {solutionLoading ? (
@@ -173,7 +184,11 @@ export default function Home() {
       ) : isSiteDown ? (
         <ErrorComponent />
       ) : (
-        <Game solution={solution} />
+        <Game
+          solution={pokemonName}
+          pokemonDexNo={pokemonDexNo}
+          spriteBaseColor={spriteBaseColor}
+        />
       )}
     </>
   );

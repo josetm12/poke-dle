@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter as FontSans } from 'next/font/google';
+import { Pixelify_Sans } from 'next/font/google';
 
 import { ThemeProvider } from '@/components/Theme-Provider';
 import { cn } from '@/lib/utils';
 
 import './globals.css';
 
-const fontSans = FontSans({
+const fontFamily = Pixelify_Sans({
   subsets: ['latin'],
-  variable: '--font-sans',
 });
 
 export const metadata: Metadata = {
@@ -23,12 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={cn(
-          'min-h-screen bg-background font-sans antialiased',
-          fontSans.variable
-        )}
-      >
+      <body className={cn('min-h-screen bg-background font-sans antialiased')}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

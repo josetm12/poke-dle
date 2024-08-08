@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { useContext } from 'react';
 import { GameContext } from '@/reducers/gameReducer';
 
@@ -15,7 +16,13 @@ export default function GameTitle({ gameWin = false, isGameOver = false }) {
           It{"'"}s {solution.toLocaleUpperCase()}
         </p>
       ) : (
-        <p>Who{"'"}s is that pokemon</p>
+        <Image
+          src="/title-logo.png"
+          alt="Title"
+          height={50}
+          width={500}
+          sizes="(max-width: 100rem) 100vw, 33vw"
+        />
       )}
       {}
     </div>

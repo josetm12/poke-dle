@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import { ImageWithFallbackProps } from '@/lib/types';
-import { relative } from 'path';
-import { Scale } from 'lucide-react';
+import { LoaderCircle } from 'lucide-react';
 
 const colorMap: Record<string, string> = {
   black: '#2c2c2c',
@@ -40,6 +39,7 @@ export default function ImageWithFallback({
   const [imgSrc, setImgSrc] = useState(
     `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokedexNumber}.png`
   );
+  const [loading, setLoading] = useState(true);
 
   console.log('pokedexNumber ', pokedexNumber);
   const filterMaskStyle = !gameWin
@@ -56,7 +56,8 @@ export default function ImageWithFallback({
   };
 
   return (
-    <div className={className}>
+    <div className={className + ''}>
+      {true && <LoaderCircle className="animate-spin ml-auto mx-auto pt-5" />}
       <Image
         src={imgSrc}
         priority
@@ -64,6 +65,7 @@ export default function ImageWithFallback({
         sizes="(max-width: 200px) 9rem"
         style={style}
         fill
+        onLoad={() => setLoading(false)}
         onError={() => setImgSrc(fallBack)}
       />
     </div>
